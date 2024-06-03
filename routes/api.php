@@ -21,8 +21,16 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::get('Notlogin', [AuthController::class, 'Notlogin'])->name('Notlogin');
 Route::get('user', [AuthController::class, 'index']);
-Route::middleware('auth:sanctum')->get('ShowUser', [AuthController::class, 'ShowUser']);
+Route::prefix('user')->middleware('auth:sanctum')->group(function () {
+    Route::get('ShowUser', [AuthController::class, 'ShowUser']);
+    Route::put('editfullname', [AuthController::class, 'editfullname']);
+    Route::post('create', [AuthController::class, 'create']);
+    Route::put('edit', [AuthController::class, 'edit']);
+    Route::delete('delete', [AuthController::class, 'delete']);
+    Route::post('editavatar', [AuthController::class, 'editavatar']);
+});
 
 // product
 Route::get('product', [ProductController::class, 'index']);
