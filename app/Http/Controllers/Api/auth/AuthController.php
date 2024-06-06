@@ -52,38 +52,46 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'email' => 'required|email',
-                'password' => 'required|string',
-            ],
-            [
-                'email.required' => 'Email không được bỏ trống',
-                'email.email' => 'Email phải là địa chỉ email hợp lệ',
-                'password.required' => 'Mật khẩu không được bỏ trống',
-            ]
-        );
-        if ($validator->fails()) {
+        try {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'email' => 'required|email',
+                    'password' => 'required|string',
+                ],
+                [
+                    'email.required' => 'Email không được bỏ trống',
+                    'email.email' => 'Email phải là địa chỉ email hợp lệ',
+                    'password.required' => 'Mật khẩu không được bỏ trống',
+                ]
+            );
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
+                ], 422);
+            }
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'message' => 'Thông tin tài khoản hoặc mật khẩu không chính xác!'
+                ], 401);
+            }
+
+            $token = $user->createToken('api-token')->plainTextToken; // tạo mã token
+
             return response()->json([
-                'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
-            ], 422);
-        }
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
+                'message' => 'Đăng nhập thành công!',
+                'user' => $user,
+                'token' => $token
+            ]);
+        } catch (\Exception $e) {
+            //throw $th;
             return response()->json([
-                'message' => 'Thông tin tài khoản hoặc mật khẩu không chính xác!'
-            ], 401);
+                'message' => $e
+            ]);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken; // tạo mã token
-
-        return response()->json([
-            'message' => 'Đăng nhập thành công!',
-            'user' => $user,
-            'token' => $token
-        ]);
     }
 
     public function editfullname(Request $request)
@@ -129,13 +137,11 @@ class AuthController extends Controller
                 'password.required'     => '--Mật khẩu không được để trống!--',
             );
             $validator = Validator::make($input, $rules, $messages);
-
             if ($validator->fails()) {
                     return response()->json([
                         'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                     ], 422);
             }
-
             $user = new User();
             $user->username = $request->username;
             $user->fullname = $request->fullname??'';
@@ -146,7 +152,6 @@ class AuthController extends Controller
             $user->password = Hash::make($request->password);
             $user->role = $request->role;
             $user->save();
-
             return response()->json([
                 'message' =>'Thêm mới tài khoản thành công!',
             ],201);
@@ -183,7 +188,6 @@ class AuthController extends Controller
                         'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                     ], 422);
             }
-
             $user = $request->user();
             $user->username = $request->username;
             $user->fullname = $request->fullname??'';
