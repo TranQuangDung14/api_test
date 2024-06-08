@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\auth;
+namespace App\Http\Controllers\Api\auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -16,31 +16,23 @@ class AuthController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('username', 'LIKE', '%' . $request->search . '%')->orderBy('id', 'desc')->get();
-
+            // dd($request->all());
+            // $perPage= $request->page;
+            $user = User::where('username', 'LIKE', '%' . $request->username . '%')->orderBy('id', 'desc')->get();
+            // $user = User::get();
+            // return response()->json([],200);
             return response()->json([
                 'user' => $user,
             ],200);
-            // return view('Admin.pages.auth.index',compact('user'));
         } catch (\Exception $e) {
-            //throw $th;
-            // dd($e);
-            // return redirect()->back();
         }
     }
     //
     public function ShowUser(Request $request)
     {
-        // $user = Auth::user();
-        // // dd($user);
-        // if($user){
         return response()->json([
             'user' => $request->user(),
         ],200);
-        // }
-        // return response()->json([
-        //     'message' => 'Không tìm thấy người dùng đã đăng nhập!',
-        // ], 401);
     }
 
     public function Notlogin(Request $request)
@@ -229,18 +221,11 @@ class AuthController extends Controller
             // dd($avatar);
             if ($request->hasFile('avatar')) {
                 $image_old = $avatar->avatar;
-                // dd($image_old);
                 Storage::delete('public/image/avatar/' . $image_old);
-                // dd($request->hasFile('avatar'));
                 $image = $request->file('avatar');
                 $filename = time() . '-' . Str::slug($image->getClientOriginalName(), '-') . '.' . $image->getClientOriginalExtension();
                 $image->storeAs('public/image/avatar', $filename);
-                // $imagePath = $image->store('public/image/avatar');
-                // Storage::delete($avatar->avatar);
-
                 $avatar->avatar = $filename;
-                // dd($imagePath);
-                // dd('dừng');
             }
             $avatar->save();
             // Toastr::success('cập nhật avatar thành công', 'success');
@@ -254,4 +239,20 @@ class AuthController extends Controller
             //throw $th;
         }
     }
+
+    public function logout(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'message' => 'Đăng xuất thành công!'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Có lỗi xảy ra!'
+            ]);
+        }
+    }
+
 }
