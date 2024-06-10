@@ -28,9 +28,9 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::put('editfullname', [AuthController::class, 'editfullname']);
     Route::post('create', [AuthController::class, 'create']);
     Route::get('show/{id}', [AuthController::class, 'Show']);
-    Route::put('edit', [AuthController::class, 'edit']);
-    Route::delete('delete', [AuthController::class, 'delete']);
-    Route::post('editavatar', [AuthController::class, 'editavatar']);
+    Route::put('edit/{id}', [AuthController::class, 'edit']);
+    Route::delete('delete/{id}', [AuthController::class, 'delete']);
+    Route::post('editavatar/{id}', [AuthController::class, 'editavatar']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
 

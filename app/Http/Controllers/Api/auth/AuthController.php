@@ -169,24 +169,15 @@ class AuthController extends Controller
         }
 
     }
-    public function edit(Request $request)
+    public function edit(Request $request,$id)
     {
         try {
             $input = $request->all();
             $rules = array(
-                // 'name' => 'required',
                 'username' => 'required|string',
-                // 'email' => 'required|string|email|max:255|unique:users',
-                // 'password' => 'required',
             );
             $messages = array(
                 'username.required'     => '--Tên người dùng không được để trống!--',
-                // 'email.required'        => '--Email không được để trống!--',
-                // 'email.string'          => '--Email phải là chuỗi!--',
-                // 'email.email'           => '--Email không hợp lệ!--',
-                // 'email.max'             => '--Email không được vượt quá 255 ký tự!--',
-                // 'email.unique'          => '--Email đã tồn tại trong hệ thống!--',
-                // 'password.required'     => '--Mật khẩu không được để trống!--',
             );
             $validator = Validator::make($input, $rules, $messages);
 
@@ -195,7 +186,7 @@ class AuthController extends Controller
                         'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                     ], 422);
             }
-            $user = $request->user();
+            $user = User::findOrFail($id);;
             $user->username = $request->username;
             $user->fullname = $request->fullname??'';
             $user->address = $request->address??'';
@@ -216,10 +207,10 @@ class AuthController extends Controller
             ],400);
         }
     }
-    public function delete(Request $request)
+    public function delete($id)
     {
         try {
-            $user = $request->user();
+            $user = User::findOrFail($id);
             $user->delete();
             return response()->json([
                 'message' => 'Xóa thành công!'
@@ -229,10 +220,10 @@ class AuthController extends Controller
         }
     }
 
-    public function editavatar(Request $request)
+    public function editavatar(Request $request,$id)
     {
         try {
-            $avatar = $request->user();
+            $avatar = User::findOrFail($id);
             // dd($avatar);
             if ($request->hasFile('avatar')) {
                 $image_old = $avatar->avatar;
