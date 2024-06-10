@@ -154,6 +154,21 @@ class AuthController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            return response()->json([
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                dd($e),
+
+            ], 200);
+        }
+
+    }
     public function edit(Request $request)
     {
         try {
