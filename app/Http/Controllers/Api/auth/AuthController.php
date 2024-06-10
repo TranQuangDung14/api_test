@@ -176,16 +176,16 @@ class AuthController extends Controller
             $rules = array(
                 // 'name' => 'required',
                 'username' => 'required|string',
-                'email' => 'required|string|email|max:255|unique:users',
+                // 'email' => 'required|string|email|max:255|unique:users',
                 // 'password' => 'required',
             );
             $messages = array(
                 'username.required'     => '--Tên người dùng không được để trống!--',
-                'email.required'        => '--Email không được để trống!--',
-                'email.string'          => '--Email phải là chuỗi!--',
-                'email.email'           => '--Email không hợp lệ!--',
-                'email.max'             => '--Email không được vượt quá 255 ký tự!--',
-                'email.unique'          => '--Email đã tồn tại trong hệ thống!--',
+                // 'email.required'        => '--Email không được để trống!--',
+                // 'email.string'          => '--Email phải là chuỗi!--',
+                // 'email.email'           => '--Email không hợp lệ!--',
+                // 'email.max'             => '--Email không được vượt quá 255 ký tự!--',
+                // 'email.unique'          => '--Email đã tồn tại trong hệ thống!--',
                 // 'password.required'     => '--Mật khẩu không được để trống!--',
             );
             $validator = Validator::make($input, $rules, $messages);
@@ -198,7 +198,7 @@ class AuthController extends Controller
             $user = $request->user();
             $user->username = $request->username;
             $user->fullname = $request->fullname??'';
-            $user->address = $request->address;
+            $user->address = $request->address??'';
             // $user->avatar = $request->avatar;
             $user->number_phone = $request->number_phone;
             // $user->email = $request->email;
