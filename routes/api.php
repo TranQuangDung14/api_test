@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::get('Notlogin', [AuthController::class, 'Notlogin'])->name('Notlogin');
-Route::get('users', [AuthController::class, 'index']);
+Route::get('users', [AuthController::class, 'index'])->middleware('auth:sanctum');
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::get('ShowUser', [AuthController::class, 'ShowUser']);
     Route::put('editfullname', [AuthController::class, 'editfullname']);
