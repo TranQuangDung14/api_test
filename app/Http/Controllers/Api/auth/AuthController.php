@@ -16,19 +16,22 @@ class AuthController extends Controller
     public function index(Request $request)
     {
         try {
-            $request->user();
+            // dd('hêh');
+            // $request->user();
             // dd($request->user()->role);
             $user = User::where('username', 'LIKE', '%' . $request->username . '%')->orderBy('id', 'desc');
             if($request->role){
                 $user->where('role',$request->role);
             };
             if($request->user()->role == 1){
-                $user = $user->get();
+                $user;
             }
             else {
-                $user = $user->where('role',2)->get();
+                $user->where('role',2);
+                // $user = $user->where('role',2)->get();
 
             };
+            $user =$user->paginate(1);
             return response()->json([
                 'user' => $user,
             ],200);
