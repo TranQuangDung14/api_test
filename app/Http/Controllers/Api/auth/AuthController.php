@@ -67,7 +67,7 @@ class AuthController extends Controller
             );
             if ($validator->fails()) {
                 return response()->json([
-                    'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
+                    'message' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                 ], 422);
             }
             $user = User::where('email', $request->email)->first();
@@ -141,7 +141,7 @@ class AuthController extends Controller
             $validator = Validator::make($input, $rules, $messages);
             if ($validator->fails()) {
                     return response()->json([
-                        'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
+                        'message' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                     ], 422);
             }
             $user = new User();
@@ -195,7 +195,7 @@ class AuthController extends Controller
 
             if ($validator->fails()) {
                     return response()->json([
-                        'errors' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
+                        'message' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
                     ], 422);
             }
             $user = User::findOrFail($id);
