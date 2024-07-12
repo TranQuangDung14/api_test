@@ -28,11 +28,17 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::put('editfullname', [AuthController::class, 'editfullname']);
     Route::post('create', [AuthController::class, 'create']);
     Route::get('show/{id}', [AuthController::class, 'Show']);
-    Route::put('edit/{id}', [AuthController::class, 'edit']);
+    Route::put('edit', [AuthController::class, 'edit']);
     Route::delete('delete/{id}', [AuthController::class, 'delete']);
-    Route::post('editavatar/{id}', [AuthController::class, 'editavatar']);
+    Route::post('editavatar', [AuthController::class, 'editavatar']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    // Route::post('/password/forgot', [ForgotPasswordController::class, 'sendResetLinkEmail'])->withoutMiddleware('auth:sanctum');
+    
 });
+Route::post('password/forgot', [AuthController::class, 'sendResetEmail']);
+Route::post('password/reset', [AuthController::class, 'reset']);
+
 
 // product
 Route::get('product', [ProductController::class, 'index']);
@@ -47,3 +53,6 @@ Route::post('category/add', [CategoriesController::class, 'store']);
 Route::get('category/{id}', [CategoriesController::class, 'show']);
 Route::put('category/edit/{id}', [CategoriesController::class, 'update']);
 Route::delete('category/delete/{id}', [CategoriesController::class, 'delete']);
+
+Route::get('/send-mail', [ProductController::class, 'sendMail']);
+Route::get('/veryfy-account/{email}', [ProductController::class, 'index']);

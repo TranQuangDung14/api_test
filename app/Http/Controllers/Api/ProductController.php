@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendMail;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -108,6 +110,24 @@ class ProductController extends Controller
             // return response()->json([
             //     'message'=> 'Bản ghi đó không còn tồn tại',
             // ]);
+            dd($e);
+        }
+    }
+
+    public function sendMail()
+    {
+        try {
+            // dd('vào11');
+            $user = [
+                'title' => 'Mail from Laravel',
+                'body' => 'This is a test mail.'
+            ];
+    
+            Mail::to('tranquangdung14062001@gmail.com')->send(new SendMail($user));
+            // dd('vào112');
+            return "Email đã được gửi thành công.";
+        } catch (\Exception $e) {
+            //throw $th;
             dd($e);
         }
     }
