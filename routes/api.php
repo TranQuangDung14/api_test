@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Api\auth\AuthController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\ProductController;
@@ -20,8 +21,12 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+Route::post('register', [AuthController::class, 'register']);
+
 Route::post('login', [AuthController::class, 'login'])->name('login');
+
 Route::get('Notlogin', [AuthController::class, 'Notlogin'])->name('Notlogin');
+
 Route::get('users', [AuthController::class, 'index'])->middleware('auth:sanctum');
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::get('ShowUser', [AuthController::class, 'ShowUser']);
@@ -36,9 +41,8 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     // Route::post('/password/forgot', [ForgotPasswordController::class, 'sendResetLinkEmail'])->withoutMiddleware('auth:sanctum');
     
 });
-Route::post('password/forgot', [AuthController::class, 'sendResetEmail']);
-Route::post('password/reset', [AuthController::class, 'reset']);
 
+Route::post('forgot-password', [AuthController::class, 'sendResetPassword']);
 
 // product
 Route::get('product', [ProductController::class, 'index']);
@@ -56,3 +60,10 @@ Route::delete('category/delete/{id}', [CategoriesController::class, 'delete']);
 
 Route::get('/send-mail', [ProductController::class, 'sendMail']);
 Route::get('/veryfy-account/{email}', [ProductController::class, 'index']);
+
+
+
+// địa chỉ
+Route::get('/provinces', [AddressController::class, 'getProvinces']);
+Route::get('/districts/{provinceId}', [AddressController::class, 'getDistricts']);
+Route::get('/wards/{districtId}', [AddressController::class, 'getWards']);

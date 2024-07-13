@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api\auth;
 use App\Http\Controllers\Controller;
 use App\Mail\SendMail;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
@@ -124,6 +128,7 @@ class AuthController extends Controller
         // dd($user);
     }
 
+    // tạo tài khoản trong ql user
     public function create(Request $request)
     {
         try {
@@ -178,6 +183,60 @@ class AuthController extends Controller
         }
     }
 
+    // tạo tk ở trang register
+    public function register(Request $request)
+    {
+        try {
+            $input = $request->all();
+            $rules = array(
+                // 'name' => 'required',
+                'username' => 'required|string',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required',
+                'role' => 'required',
+            );
+            $messages = array(
+                'username.required'     => '--Tên người dùng không được để trống!--',
+                'email.required'        => '--Email không được để trống!--',
+                'email.string'          => '--Email phải là chuỗi!--',
+                'email.email'           => '--Email không hợp lệ!--',
+                'email.max'             => '--Email không được vượt quá 255 ký tự!--',
+                'email.unique'          => '--Email đã tồn tại trong hệ thống!--',
+                'password.required'     => '--Mật khẩu không được để trống!--',
+                'role.required'         => '--Quyền không được để trống!--',
+            );
+            $validator = Validator::make($input, $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => $validator->errors()->toArray() // Lấy danh sách lỗi từ validate
+                ], 422);
+            }
+            $user = new User();
+            $user->username = $request->username;
+            $user->fullname = $request->fullname ?? '';
+            $user->address = $request->address;
+            // $user->avatar = $request->avatar;
+            $user->number_phone = $request->number_phone;
+            $user->email = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->role = 2;
+            $user->save();
+            // mail
+            // $info['username'] = $user->username;
+            // $info['fullname'] = $user->fullname;
+            // if($user){
+            //     Mail::to($user->email)->send(new SendMail($info));
+            // }
+            return response()->json([
+                // 'user'=>$user,
+                'message' => 'Thêm mới tài khoản thành công!',
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Có lỗi xảy ra!',
+            ], 400);
+        }
+    }
     public function veryfy($email)
     {
     }
@@ -279,7 +338,6 @@ class AuthController extends Controller
     {
         try {
             $request->user()->currentAccessToken()->delete();
-
             return response()->json([
                 'message' => 'Đăng xuất thành công!'
             ]);
@@ -319,82 +377,63 @@ class AuthController extends Controller
                     'message' => $validator->errors()
                 ], 422);
             }
-    
             if (!Hash::check($request->old_password, $user->password)) {
                 return response()->json(['message' => 'Mật khẩu hiện tại không khớp'], 403);
             }
-    
             $user->password = Hash::make($request->new_password);
             $user->save();
     
             return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công'], 200);
-        } catch (\Throwable $e) {
-            Log::error('lỗi: ' . $e->getMessage());
-            return response()->json(['message' => 'Đã có lỗi xảy ra, vui lòng thử lại sau'], 500);
-        }
-    }
-    
-
-    public function sendResetEmail(Request $request)
-    {
-        try {
-            $input = $request->all();
-            $rules = [
-                'email' => 'required'
-            ];
-            $messages = [
-                'email.required' => '--email không được để trống!--',
-            ];
-    
-            $validator = Validator::make($input, $rules, $messages);
-    
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => $validator->errors()
-                ], 422);
-            }
-            $status = Password::sendResetLink(
-                $request->only('email')
-            );
-    
-            if ($status == Password::RESET_LINK_SENT) {
-                return response()->json(['message' => 'Đã gửi email chứa liên kết đặt lại mật khẩu'], 200);
-            } else {
-                return response()->json(['error' => 'Không thể gửi email đặt lại mật khẩu'], 500);
-            }
         } catch (\Exception $e) {
-            dd($e);
             Log::error('lỗi: ' . $e->getMessage());
             return response()->json(['message' => 'Đã có lỗi xảy ra, vui lòng thử lại sau'], 500);
         }
     }
+    
 
-    public function reset(Request $request)
+    public function sendResetPassword(Request $request)
     {
-        // dd('vào');
-        $validator = Validator::make($request->all(), [
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
+        $input = $request->all();
+        $rules = [
+            'email' => 'required',
+        ];
+        $messages = [
+            'email.required' => '--Mật khẩu cũ không được để trống!--',
+        ];
+        $validator = Validator::make($input, $rules, $messages);
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => $validator->errors()
+            ], 422);
+        }
+        DB::beginTransaction();
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email không tồn tại!'], 404);
         }
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->password = Hash::make($password);
-                $user->save();
-            }
-        );
+        // Tạo mật khẩu mới ngẫu nhiên gồm 6 ký tự
+        $newPassword = Str::random(6);
 
-        if ($status == Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Mật khẩu đã được đặt lại thành công'], 200);
-        } else {
-            return response()->json(['error' => 'Không thể đặt lại mật khẩu'], 500);
+        // Cập nhật mật khẩu người dùng
+        $user->password = Hash::make($newPassword);
+        $user->save();
+        try {
+            // Gửi email với mật khẩu mới
+            Mail::send('email.forgetPassword', ['newPassword' => $newPassword], function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Mật khẩu mới của bạn');
+            });
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            // Xóa mật khẩu đã cập nhật nếu không gửi được email
+            $user->password = Hash::make(Str::random(60));
+            $user->save();
+            return response()->json(['message' => 'Không thể gửi email. Vui lòng thử lại sau.'], 500);
         }
+        return response()->json(['message' => 'Mật khẩu đã được gửi đến email của bạn.']);
     }
 
 }

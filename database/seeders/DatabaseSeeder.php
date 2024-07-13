@@ -30,9 +30,12 @@ class DatabaseSeeder extends Seeder
         DB::table('users')->insert([
             'username' => 'Dương dẹo',
             'fullname' => 'Nguyễn Thái Dương',
-            'email' => 'deo@gmail.com',
+            'email' => 'quangdung14062001@gmail.com',
             'password' => Hash::make('12345'),
             'role'  => 1,
         ]);
+
+        $this->call([
+            ImportProvinceDistrictWardSeeder::class,]);
     }
 }
