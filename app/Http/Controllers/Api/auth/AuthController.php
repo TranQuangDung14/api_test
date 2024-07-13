@@ -193,7 +193,7 @@ class AuthController extends Controller
                 'username' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required',
-                'role' => 'required',
+                // 'role' => 'required',
             );
             $messages = array(
                 'username.required'     => '--Tên người dùng không được để trống!--',
@@ -203,7 +203,7 @@ class AuthController extends Controller
                 'email.max'             => '--Email không được vượt quá 255 ký tự!--',
                 'email.unique'          => '--Email đã tồn tại trong hệ thống!--',
                 'password.required'     => '--Mật khẩu không được để trống!--',
-                'role.required'         => '--Quyền không được để trống!--',
+                // 'role.required'         => '--Quyền không được để trống!--',
             );
             $validator = Validator::make($input, $rules, $messages);
             if ($validator->fails()) {
