@@ -165,6 +165,9 @@ class AuthController extends Controller
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
             $user->role = $request->role;
+            $user->province_code = $request->province_code;
+            $user->district_code = $request->district_code;
+            $user->ward_code = $request->ward_code;
             $user->save();
             // mail
             // $info['username'] = $user->username;
@@ -219,6 +222,9 @@ class AuthController extends Controller
             $user->number_phone = $request->number_phone;
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
+            $user->province_code = $request->province_code;
+            $user->district_code = $request->district_code;
+            $user->ward_code = $request->ward_code;
             $user->role = 2;
             $user->save();
             // mail
@@ -280,6 +286,9 @@ class AuthController extends Controller
             // $user->avatar = $request->avatar;
             $user->number_phone = $request->number_phone;
             // $user->email = $request->email;
+            $user->province_code = $request->province_code;
+            $user->district_code = $request->district_code;
+            $user->ward_code = $request->ward_code;
             $user->role = $request->role;
             $user->update();
 
@@ -294,7 +303,7 @@ class AuthController extends Controller
             ], 400);
         }
     }
-  
+
     public function delete($id)
     {
         try {
@@ -352,11 +361,11 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            
+
             if (!$user) {
                 return response()->json(['error' => 'Không tìm thấy người dùng được xác thực nào'], 403);
             }
-    
+
             $input = $request->all();
             $rules = [
                 'old_password' => 'required',
@@ -369,9 +378,9 @@ class AuthController extends Controller
                 'new_confirm_password.required' => '--Xác nhận mật khẩu mới không được để trống!--',
                 'new_confirm_password.same' => '--Xác nhận mật khẩu mới không khớp!--',
             ];
-    
+
             $validator = Validator::make($input, $rules, $messages);
-    
+
             if ($validator->fails()) {
                 return response()->json([
                     'message' => $validator->errors()
@@ -382,14 +391,14 @@ class AuthController extends Controller
             }
             $user->password = Hash::make($request->new_password);
             $user->save();
-    
+
             return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công'], 200);
         } catch (\Exception $e) {
             Log::error('lỗi: ' . $e->getMessage());
             return response()->json(['message' => 'Đã có lỗi xảy ra, vui lòng thử lại sau'], 500);
         }
     }
-    
+
 
     public function sendResetPassword(Request $request)
     {
@@ -435,7 +444,6 @@ class AuthController extends Controller
         }
         return response()->json(['message' => 'Mật khẩu đã được gửi đến email của bạn.']);
     }
-
 }
 
 // sửa theo id

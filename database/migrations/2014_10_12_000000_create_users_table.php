@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->integer("province_code")->unsigned()->nullable();
+            $table->integer("district_code")->unsigned()->nullable();
+            $table->integer("ward_code")->unsigned()->nullable();
             $table->integer("role")->unsigned();
             $table->rememberToken();
             $table->timestamps();
